@@ -7,12 +7,17 @@
 //
 
 import UIKit
+import UserNotifications
 
-class ADTutorialViewController: UIViewController {
+class ADTutorialViewController: UIViewController,UIScrollViewDelegate {
 
+    @IBOutlet weak var pageControll: UIPageControl!
+    
+    @IBOutlet weak var scrollView: UIScrollView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // Do any additional setup after loading the view.
     }
 
@@ -21,18 +26,37 @@ class ADTutorialViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
+    @IBAction func pageControlAction(_ sender: UIPageControl) {
+        moveToPageOfNum(sender.currentPage)
+    }
+    
+    func moveToPageOfNum(_ num: Int) {
+        let contentOffset = CGPoint.init(x: CGFloat(num) *  scrollView.frame.size.width, y: 0)
+        scrollView.setContentOffset(contentOffset, animated: true)
+    }
+    
     @IBAction func closeButtonAction(_ sender: UIButton) {
         dismiss(animated: true, completion: nil)
     }
     
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    @IBAction func enableNotificationAction(_ sender: UIButton) {
+        UNUserNotificationCenter.current().requestAuthorization(options: [UNAuthorizationOptions.alert,UNAuthorizationOptions.badge,UNAuthorizationOptions.sound]) { (success, error) in
+            if success == false {
+                DispatchQueue.main.sync {
+                     UIApplication.shared.openURL(NSURL(string: UIApplicationOpenSettingsURLString)! as URL )
+                }
+            } else {
+                self.closeButtonAction(UIButton.init())
+            }
+        }
     }
-    */
+    
+    
+    //MARK: UIScrollViewDelegate
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+         let page  = Int(scrollView.contentOffset.x / scrollView.frame.size.width)
+        print("page = \(page)")
+        pageControll.currentPage = page
+    }
 
 }
